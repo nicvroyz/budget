@@ -203,8 +203,8 @@ function render(){
     const pct = salary>0 ? Math.round((i.amount/salary)*100) : 0
     return `
 <tr>
-<td><input value="${i.name}" onchange="update(${idx},'name',this.value)"></td>
-<td><input type="number" value="${i.amount}" onchange="update(${idx},'amount',this.value)"></td>
+<td><input value="${i.name}" oninput="update($1,'name',this.value)"></td>
+<td><input type="number" value="${i.amount}" oninput="update($1,'amount',this.value)"></td>
 <td style="font-size:12px;color:#64748b;padding-top:18px">${pct}%</td>
 </tr>`
   }).join('')
@@ -228,8 +228,8 @@ function renderDaily(bridgeBudget, dailyMax){
   const dailyTable=document.getElementById('dailyTable')
   dailyTable.innerHTML='<tr><th>Categoría diaria</th><th>Monto</th></tr>'+dailyItems.map((i,idx)=>`
 <tr>
-<td><input value="${i.name}" onchange="updateDaily(${idx},'name',this.value)"></td>
-<td><input type="number" value="${i.amount}" onchange="updateDaily(${idx},'amount',this.value)"></td>
+<td><input value="${i.name}" oninput="updateDaily($1,'name',this.value)"></td>
+<td><input type="number" value="${i.amount}" oninput="updateDaily($1,'amount',this.value)"></td>
 </tr>`).join('')
 
   document.getElementById('dailySpent').innerText = format(dailySpent)
