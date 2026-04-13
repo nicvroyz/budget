@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Presupuesto</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{--bg:#f5f7fb;--card:#ffffff;--text:#0f172a;--muted:#64748b;--line:#e5e7eb;--primary:#2563eb;--danger:#ef4444;--ok:#16a34a}
+body{font-family:Inter;background:var(--bg);margin:0;padding:24px;color:var(--text)}
+.container{max-width:960px;margin:auto}
+h1{font-size:22px;margin-bottom:18px;font-weight:700}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 6px 16px rgba(0,0,0,0.04)}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.kpi{background:linear-gradient(135deg,#f8fafc,#eef2ff);border-radius:10px;padding:14px;display:flex;align-items:center;gap:10px;transition:all .25s ease}
+.kpi.warn{background:linear-gradient(135deg,#fee2e2,#fecaca);transform:scale(1.03)}
+.kpi.ok{background:linear-gradient(135deg,#ecfdf5,#d1fae5)}
+.kpi .icon{font-size:20px}
+.kpi small{color:var(--muted);font-size:12px;display:block}
+.kpi strong{font-size:16px;display:block;margin-top:2px}
+.kpi .text{display:flex;flex-direction:column}
+input{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px;font-size:14px}
+button{margin-top:10px;padding:8px 12px;border:none;background:var(--primary);color:white;border-radius:8px;font-size:13px;cursor:pointer}
+.table{width:100%;border-collapse:collapse}
+.table th{font-size:12px;color:var(--muted);text-align:left}
+.table td{padding:8px 0;border-bottom:1px solid var(--line)}
+canvas{max-height:220px}
+.insight{font-size:14px;font-weight:600}
+.highlight{color:var(--primary)}
+.helper{font-size:12px;color:var(--muted);margin-top:6px}
+.toast{position:fixed;bottom:20px;right:20px;background:#111;color:#fff;padding:12px 16px;border-radius:8px;font-size:13px;opacity:0;transform:translateY(10px);transition:all .3s}
+.toast.show{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>Presupuesto mensual</h1>
+
+<div class="card kpis">
+  <div class="kpi" id="kpi-income"><div class="icon">💰</div><div class="text"><small>Ingreso</small><strong id="income"></strong></div></div>
+  <div class="kpi" id="kpi-expenses"><div class="icon">💸</div><div class="text"><small>Gastos</small><strong id="expenses"></strong></div></div>
+  <div class="kpi" id="kpi-balance"><div class="icon">📊</div><div class="text"><small>Disponible</small><strong id="balance"></strong></div></div>
+  <div class="kpi" id="kpi-fun"><div class="icon">🎯</div><div class="text"><small>Ocio recomendado</small><strong id="fun"></strong></div></div>
+  <div class="kpi" id="kpi-saving"><div class="icon">🏦</div><div class="text"><small>Ahorro (20%)</small><strong id="saving"></strong></div></div>
+</div>
+
+<div class="card">
+  <input type="number" id="salary" value="1400000">
+  <div class="helper">Ahorro primero (20%) → luego ocio dentro del margen seguro.</div>
+</div>
+
+<div class="card">
+  <table class="table" id="table"></table>
+  <button onclick="addRow()">Agregar gasto</button>
+</div>
+
+<div class="card">
+  <canvas id="chart"></canvas>
+</div>
+
+<div class="card insight" id="insight"></div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let items=[
+{name:"Arriendo",amount:420000},
+{name:"Cuentas",amount:150000},
+{name:"Comida",amount:100000},
+{name:"Gastos comunes",amount:60000},
+{name:"Combustible",amount:40000}
+]
+
+let chart
+
+function showToast(msg){
+ const t=document.getElementById('toast')
+ t.innerText=msg
+ t.classList.add('show')
+ setTimeout(()=>t.classList.remove('show'),2000)
+}
+
+function animateValue(el, newVal){
+ el.style.transition='transform .2s'
+ el.style.transform='scale(1.1)'
+ setTimeout(()=>el.style.transform='scale(1)',200)
+ el.innerText=newVal
+}
+
+function render(){
+const salary=Number(document.getElementById('salary').value||0)
+items.sort((a,b)=>b.amount-a.amount)
+
+const expenses=items.reduce((a,b)=>a+b.amount,0)
+const balance=salary-expenses
+
+const savingTarget = salary * 0.2
+const funCapClassic = salary * 0.3
+const realFunCap = Math.min(funCapClassic, Math.max(0, balance - savingTarget))
+
+animateValue(document.getElementById('income'),format(salary))
+animateValue(document.getElementById('expenses'),format(expenses))
+animateValue(document.getElementById('balance'),format(balance))
+animateValue(document.getElementById('fun'),format(realFunCap))
+animateValue(document.getElementById('saving'),format(savingTarget))
+
+// micro feedback
+const funKpi=document.getElementById('kpi-fun')
+funKpi.classList.remove('warn','ok')
+
+if(balance - savingTarget < 0){
+ funKpi.classList.add('warn')
+ showToast('Te estás pasando: estás afectando tu ahorro')
+}else{
+ funKpi.classList.add('ok')
+}
+
+const table=document.getElementById('table')
+table.innerHTML='<tr><th>Concepto</th><th>Monto</th></tr>'+items.map((i,idx)=>{
+  const pct = salary>0 ? Math.round((i.amount/salary)*100) : 0
+  return `
+<tr>
+<td><input value="${i.name}" onchange="update(${idx},'name',this.value)"></td>
+<td><input type="number" value="${i.amount}" onchange="update(${idx},'amount',this.value)"></td>
+</tr>
+<tr>
+<td colspan="2" style="font-size:12px;color:#64748b;padding-bottom:10px">${pct}% del ingreso</td>
+</tr>`
+}).join('')
+
+const top=items[0]
+document.getElementById('insight').innerHTML=`Principal gasto: <span class="highlight">${top.name}</span> (${format(top.amount)})`
+
+renderChart()
+}
+
+function renderChart(){
+const ctx=document.getElementById('chart')
+if(chart) chart.destroy()
+
+chart=new Chart(ctx,{
+ type:'bar',
+ data:{
+  labels:items.map(i=>i.name),
+  datasets:[{
+   data:items.map(i=>i.amount),
+   backgroundColor:'#2563eb',
+   borderRadius:8
+  }]
+ },
+ options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{display:false}}}
+})
+}
+
+function update(i,k,v){items[i][k]=k==='amount'?Number(v):v;render()}
+function addRow(){items.push({name:"Nuevo",amount:0});render()}
+function format(n){return new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n)}
+
+document.getElementById('salary').addEventListener('input',render)
+
+render()
+</script>
+
+</body>
+</html>
