@@ -7,64 +7,153 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-:root{--bg:#f5f7fb;--card:#ffffff;--text:#0f172a;--muted:#64748b;--line:#e5e7eb;--primary:#2563eb;--danger:#ef4444;--ok:#16a34a}
+:root{
+  --bg:#f5f7fb;
+  --card:#ffffff;
+  --text:#0f172a;
+  --muted:#64748b;
+  --line:#e5e7eb;
+  --primary:#2563eb;
+  --primary-soft:#dbeafe;
+  --ok:#16a34a;
+  --ok-soft:#dcfce7;
+  --warn:#ea580c;
+  --warn-soft:#ffedd5;
+}
+*{box-sizing:border-box}
 body{font-family:Inter;background:var(--bg);margin:0;padding:24px;color:var(--text)}
-.container{max-width:960px;margin:auto}
-h1{font-size:22px;margin-bottom:18px;font-weight:700}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;box-shadow:0 6px 16px rgba(0,0,0,0.04)}
-.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
-.kpi{background:linear-gradient(135deg,#f8fafc,#eef2ff);border-radius:10px;padding:14px;display:flex;align-items:center;gap:10px;transition:all .25s ease}
-.kpi.warn{background:linear-gradient(135deg,#fee2e2,#fecaca);transform:scale(1.03)}
-.kpi.ok{background:linear-gradient(135deg,#ecfdf5,#d1fae5)}
-.kpi .icon{font-size:20px}
+.container{max-width:1100px;margin:auto}
+h1{font-size:24px;margin:0 0 6px;font-weight:700}
+.subtitle{font-size:13px;color:var(--muted);margin-bottom:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 8px 24px rgba(15,23,42,.05)}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.kpi{background:linear-gradient(135deg,#f8fafc,#eef2ff);border-radius:12px;padding:14px;display:flex;align-items:center;gap:10px;transition:all .2s ease}
+.kpi.primary{background:linear-gradient(135deg,#eff6ff,#dbeafe)}
+.kpi.success{background:linear-gradient(135deg,#f0fdf4,#dcfce7)}
+.kpi.warning{background:linear-gradient(135deg,#fff7ed,#ffedd5)}
+.kpi .icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;background:rgba(255,255,255,.85);box-shadow:0 2px 8px rgba(0,0,0,.05)}
 .kpi small{color:var(--muted);font-size:12px;display:block}
 .kpi strong{font-size:16px;display:block;margin-top:2px}
-.kpi .text{display:flex;flex-direction:column}
-input{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px;font-size:14px}
-button{margin-top:10px;padding:8px 12px;border:none;background:var(--primary);color:white;border-radius:8px;font-size:13px;cursor:pointer}
+.kpi .text{display:flex;flex-direction:column;min-width:0}
+.grid-2{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}
+.section-title{font-size:16px;font-weight:700;margin:0 0 10px}
+.helper{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5}
+.input-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.input-grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600}
+input{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px;background:#fff}
+button{margin-top:10px;padding:9px 12px;border:none;background:var(--primary);color:white;border-radius:10px;font-size:13px;cursor:pointer;font-weight:600}
+.button-secondary{background:#e2e8f0;color:#0f172a}
 .table{width:100%;border-collapse:collapse}
-.table th{font-size:12px;color:var(--muted);text-align:left}
-.table td{padding:8px 0;border-bottom:1px solid var(--line)}
-canvas{max-height:220px}
-.insight{font-size:14px;font-weight:600}
+.table th{font-size:12px;color:var(--muted);text-align:left;padding-bottom:8px}
+.table td{padding:10px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.table input{padding:8px 10px}
+.chart-wrap{height:260px}
+.insight{font-size:14px;font-weight:600;line-height:1.6}
 .highlight{color:var(--primary)}
-.helper{font-size:12px;color:var(--muted);margin-top:6px}
-.toast{position:fixed;bottom:20px;right:20px;background:#111;color:#fff;padding:12px 16px;border-radius:8px;font-size:13px;opacity:0;transform:translateY(10px);transition:all .3s}
-.toast.show{opacity:1;transform:translateY(0)}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.badge.ok{background:var(--ok-soft);color:var(--ok)}
+.badge.warn{background:var(--warn-soft);color:var(--warn)}
+.daily-layout{display:grid;grid-template-columns:1fr .9fr;gap:14px}
+.daily-total{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:12px;background:#f8fafc;border:1px solid var(--line);margin-bottom:10px}
+.mini-card{padding:12px 14px;border-radius:12px;background:#f8fafc;border:1px solid var(--line)}
+.mini-card + .mini-card{margin-top:10px}
+@media (max-width:1000px){
+  .kpis{grid-template-columns:repeat(3,1fr)}
+  .grid-2,.daily-layout,.input-grid,.input-grid-2{grid-template-columns:1fr}
+}
+@media (max-width:700px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+}
 </style>
 </head>
 <body>
 <div class="container">
 
 <h1>Presupuesto mensual</h1>
+<div class="subtitle">Base actualizada al 13 de abril. Incluye ahorro ya existente y una sección separada para control diario hasta el próximo sueldo.</div>
 
 <div class="card kpis">
-  <div class="kpi" id="kpi-income"><div class="icon">💰</div><div class="text"><small>Ingreso</small><strong id="income"></strong></div></div>
-  <div class="kpi" id="kpi-expenses"><div class="icon">💸</div><div class="text"><small>Gastos</small><strong id="expenses"></strong></div></div>
-  <div class="kpi" id="kpi-balance"><div class="icon">📊</div><div class="text"><small>Disponible</small><strong id="balance"></strong></div></div>
-  <div class="kpi" id="kpi-fun"><div class="icon">🎯</div><div class="text"><small>Ocio recomendado</small><strong id="fun"></strong></div></div>
-  <div class="kpi" id="kpi-saving"><div class="icon">🏦</div><div class="text"><small>Ahorro (20%)</small><strong id="saving"></strong></div></div>
+  <div class="kpi primary"><div class="icon">💰</div><div class="text"><small>Sueldo próximo</small><strong id="income"></strong></div></div>
+  <div class="kpi success"><div class="icon">🏦</div><div class="text"><small>Ahorro actual</small><strong id="currentSavings"></strong></div></div>
+  <div class="kpi"><div class="icon">💸</div><div class="text"><small>Gastos fijos + base</small><strong id="expenses"></strong></div></div>
+  <div class="kpi"><div class="icon">📊</div><div class="text"><small>Disponible post sueldo</small><strong id="balance"></strong></div></div>
+  <div class="kpi warning"><div class="icon">🎯</div><div class="text"><small>Ocio recomendado</small><strong id="fun"></strong></div></div>
+  <div class="kpi success"><div class="icon">📈</div><div class="text"><small>Ahorro sugerido</small><strong id="saving"></strong></div></div>
 </div>
 
 <div class="card">
-  <input type="number" id="salary" value="1400000">
-  <div class="helper">Ahorro primero (20%) → luego ocio dentro del margen seguro.</div>
+  <div class="section-title">Parámetros del mes</div>
+  <div class="input-grid">
+    <div>
+      <label for="currentSavingsInput">Ahorro actual al 13 abril</label>
+      <input type="number" id="currentSavingsInput" value="1000000">
+    </div>
+    <div>
+      <label for="salary">Sueldo del 28 abril</label>
+      <input type="number" id="salary" value="1400000">
+    </div>
+    <div>
+      <label for="salaryDate">Fecha de sueldo</label>
+      <input type="text" id="salaryDate" value="28 abril" />
+    </div>
+  </div>
+  <div class="helper">El ahorro actual se muestra como colchón separado. No se mezcla con el sueldo del mes: así puedes distinguir entre caja disponible y fondo acumulado.</div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="section-title">Gastos mensuales base</div>
+    <table class="table" id="table"></table>
+    <button onclick="addRow()">Agregar gasto mensual</button>
+  </div>
+
+  <div class="card">
+    <div class="section-title">Lectura financiera</div>
+    <div class="mini-card"><strong id="fixedCoverage"></strong><div class="helper">Cuánto representan tus gastos del mes frente al sueldo que entra el 28.</div></div>
+    <div class="mini-card"><strong id="bridgeStatus"></strong><div class="helper">Control del período puente desde hoy hasta la fecha de pago.</div></div>
+    <div class="mini-card"><strong id="savingStatus"></strong><div class="helper">Ahorro sugerido luego de cubrir gastos base y mantener un margen sano.</div></div>
+  </div>
 </div>
 
 <div class="card">
-  <table class="table" id="table"></table>
-  <button onclick="addRow()">Agregar gasto</button>
+  <div class="section-title">¿Dónde se va el dinero mensual?</div>
+  <div class="chart-wrap"><canvas id="chart"></canvas></div>
 </div>
 
 <div class="card">
-  <canvas id="chart"></canvas>
+  <div class="section-title">Control diario / período transitorio</div>
+  <div class="helper">Esta sección sirve para registrar los gastos del día hasta el 28. La idea es usar un presupuesto puente separado del presupuesto mensual completo.</div>
+
+  <div class="input-grid-2" style="margin-top:12px;">
+    <div>
+      <label for="bridgeBudget">Presupuesto puente hasta el sueldo</label>
+      <input type="number" id="bridgeBudget" value="120000">
+    </div>
+    <div>
+      <label for="dailyMax">Límite diario sugerido</label>
+      <input type="number" id="dailyMax" value="8000">
+    </div>
+  </div>
+
+  <div class="daily-layout" style="margin-top:14px;">
+    <div>
+      <table class="table" id="dailyTable"></table>
+      <button onclick="addDailyRow()">Agregar gasto diario</button>
+    </div>
+    <div>
+      <div class="daily-total"><span>Gastado hasta ahora</span><strong id="dailySpent"></strong></div>
+      <div class="daily-total"><span>Restante del puente</span><strong id="dailyRemaining"></strong></div>
+      <div class="daily-total"><span>Promedio diario usado</span><strong id="dailyAverage"></strong></div>
+      <div id="dailyBadgeWrap" style="margin-top:10px"></div>
+      <div class="helper" id="dailyInsight" style="margin-top:12px"></div>
+    </div>
+  </div>
 </div>
 
 <div class="card insight" id="insight"></div>
 
 </div>
-
-<div class="toast" id="toast"></div>
 
 <script>
 let items=[
@@ -75,92 +164,131 @@ let items=[
 {name:"Combustible",amount:40000}
 ]
 
+let dailyItems=[
+{name:"Comida",amount:0},
+{name:"Combustible",amount:0},
+{name:"Ocio",amount:0}
+]
+
 let chart
 
-function showToast(msg){
- const t=document.getElementById('toast')
- t.innerText=msg
- t.classList.add('show')
- setTimeout(()=>t.classList.remove('show'),2000)
-}
-
-function animateValue(el, newVal){
- el.style.transition='transform .2s'
- el.style.transform='scale(1.1)'
- setTimeout(()=>el.style.transform='scale(1)',200)
- el.innerText=newVal
-}
-
 function render(){
-const salary=Number(document.getElementById('salary').value||0)
-items.sort((a,b)=>b.amount-a.amount)
+  const salary=Number(document.getElementById('salary').value||0)
+  const currentSavings=Number(document.getElementById('currentSavingsInput').value||0)
+  const bridgeBudget=Number(document.getElementById('bridgeBudget').value||0)
+  const dailyMax=Number(document.getElementById('dailyMax').value||0)
 
-const expenses=items.reduce((a,b)=>a+b.amount,0)
-const balance=salary-expenses
+  items.sort((a,b)=>b.amount-a.amount)
 
-const savingTarget = salary * 0.2
-const funCapClassic = salary * 0.3
-const realFunCap = Math.min(funCapClassic, Math.max(0, balance - savingTarget))
+  const expenses=items.reduce((a,b)=>a+b.amount,0)
+  const balance=salary-expenses
+  const savingTarget = Math.max(0, Math.round(salary * 0.2))
+  const funCapClassic = Math.round(salary * 0.15)
+  const realFunCap = Math.min(funCapClassic, Math.max(0, balance - savingTarget))
 
-animateValue(document.getElementById('income'),format(salary))
-animateValue(document.getElementById('expenses'),format(expenses))
-animateValue(document.getElementById('balance'),format(balance))
-animateValue(document.getElementById('fun'),format(realFunCap))
-animateValue(document.getElementById('saving'),format(savingTarget))
+  document.getElementById('income').innerText=format(salary)
+  document.getElementById('currentSavings').innerText=format(currentSavings)
+  document.getElementById('expenses').innerText=format(expenses)
+  document.getElementById('balance').innerText=format(balance)
+  document.getElementById('fun').innerText=format(realFunCap)
+  document.getElementById('saving').innerText=format(savingTarget)
 
-// micro feedback
-const funKpi=document.getElementById('kpi-fun')
-funKpi.classList.remove('warn','ok')
+  const expenseRatio = salary>0 ? Math.round((expenses/salary)*100) : 0
+  document.getElementById('fixedCoverage').innerHTML = `Tus gastos base consumen <span class="highlight">${expenseRatio}%</span> del sueldo.`
+  document.getElementById('bridgeStatus').innerHTML = `Tienes <span class="highlight">${format(currentSavings)}</span> ahorrado, pero el presupuesto puente sugerido se mantiene separado en <span class="highlight">${format(bridgeBudget)}</span>.`
+  document.getElementById('savingStatus').innerHTML = `Si mantienes los gastos base, puedes apartar <span class="highlight">${format(savingTarget)}</span> y aún dejar un ocio sugerido de <span class="highlight">${format(realFunCap)}</span>.`
 
-if(balance - savingTarget < 0){
- funKpi.classList.add('warn')
- showToast('Te estás pasando: estás afectando tu ahorro')
-}else{
- funKpi.classList.add('ok')
-}
-
-const table=document.getElementById('table')
-table.innerHTML='<tr><th>Concepto</th><th>Monto</th></tr>'+items.map((i,idx)=>{
-  const pct = salary>0 ? Math.round((i.amount/salary)*100) : 0
-  return `
+  const table=document.getElementById('table')
+  table.innerHTML='<tr><th>Concepto</th><th>Monto</th><th>Peso</th></tr>'+items.map((i,idx)=>{
+    const pct = salary>0 ? Math.round((i.amount/salary)*100) : 0
+    return `
 <tr>
 <td><input value="${i.name}" onchange="update(${idx},'name',this.value)"></td>
 <td><input type="number" value="${i.amount}" onchange="update(${idx},'amount',this.value)"></td>
-</tr>
-<tr>
-<td colspan="2" style="font-size:12px;color:#64748b;padding-bottom:10px">${pct}% del ingreso</td>
+<td style="font-size:12px;color:#64748b;padding-top:18px">${pct}%</td>
 </tr>`
-}).join('')
+  }).join('')
 
-const top=items[0]
-document.getElementById('insight').innerHTML=`Principal gasto: <span class="highlight">${top.name}</span> (${format(top.amount)})`
+  renderDaily(bridgeBudget, dailyMax)
 
-renderChart()
+  const top=items[0]
+  document.getElementById('insight').innerHTML=`
+  Principal gasto mensual: <span class="highlight">${top.name}</span> (${format(top.amount)}).<br>
+  Con el sueldo del 28, tus gastos base quedarían cubiertos y el excedente debería dividirse entre <span class="highlight">ahorro</span> y <span class="highlight">ocio controlado</span>. Mientras tanto, usa el presupuesto puente diario para no tocar más ahorro del necesario.`
+
+  renderChart()
+}
+
+function renderDaily(bridgeBudget, dailyMax){
+  const dailySpent = dailyItems.reduce((a,b)=>a+Number(b.amount||0),0)
+  const dailyRemaining = bridgeBudget - dailySpent
+  const usedEntries = dailyItems.filter(i=>Number(i.amount||0)>0).length
+  const dailyAverage = usedEntries>0 ? Math.round(dailySpent/usedEntries) : 0
+
+  const dailyTable=document.getElementById('dailyTable')
+  dailyTable.innerHTML='<tr><th>Categoría diaria</th><th>Monto</th></tr>'+dailyItems.map((i,idx)=>`
+<tr>
+<td><input value="${i.name}" onchange="updateDaily(${idx},'name',this.value)"></td>
+<td><input type="number" value="${i.amount}" onchange="updateDaily(${idx},'amount',this.value)"></td>
+</tr>`).join('')
+
+  document.getElementById('dailySpent').innerText = format(dailySpent)
+  document.getElementById('dailyRemaining').innerText = format(dailyRemaining)
+  document.getElementById('dailyAverage').innerText = format(dailyAverage)
+
+  const wrap=document.getElementById('dailyBadgeWrap')
+  const insight=document.getElementById('dailyInsight')
+
+  if(dailySpent <= bridgeBudget && dailyAverage <= dailyMax){
+    wrap.innerHTML = '<span class="badge ok">✔ Dentro del plan puente</span>'
+    insight.innerHTML = `Vas bien. Sigues dentro del presupuesto transitorio y tu promedio por registro está bajo el límite sugerido de <strong>${format(dailyMax)}</strong>.`
+  } else {
+    wrap.innerHTML = '<span class="badge warn">⚠ Sobre el ritmo esperado</span>'
+    if(dailySpent > bridgeBudget){
+      insight.innerHTML = `Ya superaste el presupuesto puente por <strong>${format(Math.abs(dailyRemaining))}</strong>. Conviene frenar ocio y compras no esenciales hasta el sueldo.`
+    } else {
+      insight.innerHTML = `Aún no te pasas del total, pero tu promedio por registro va sobre el límite sugerido de <strong>${format(dailyMax)}</strong>.`
+    }
+  }
 }
 
 function renderChart(){
-const ctx=document.getElementById('chart')
-if(chart) chart.destroy()
+  const ctx=document.getElementById('chart')
+  if(chart) chart.destroy()
 
-chart=new Chart(ctx,{
- type:'bar',
- data:{
-  labels:items.map(i=>i.name),
-  datasets:[{
-   data:items.map(i=>i.amount),
-   backgroundColor:'#2563eb',
-   borderRadius:8
-  }]
- },
- options:{indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{display:false}}}
-})
+  chart=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:items.map(i=>i.name),
+      datasets:[{
+        data:items.map(i=>i.amount),
+        backgroundColor:['#2563eb','#60a5fa','#93c5fd','#bfdbfe','#dbeafe'],
+        borderRadius:10,
+        borderSkipped:false
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      indexAxis:'y',
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{display:false},
+        y:{ticks:{color:'#0f172a',font:{size:12,weight:'600'}},grid:{display:false}}
+      }
+    }
+  })
 }
 
 function update(i,k,v){items[i][k]=k==='amount'?Number(v):v;render()}
-function addRow(){items.push({name:"Nuevo",amount:0});render()}
-function format(n){return new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(n)}
+function addRow(){items.push({name:'Nuevo',amount:0});render()}
+function updateDaily(i,k,v){dailyItems[i][k]=k==='amount'?Number(v):v;render()}
+function addDailyRow(){dailyItems.push({name:'Nuevo',amount:0});render()}
+function format(n){return new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0}).format(Number(n||0))}
 
-document.getElementById('salary').addEventListener('input',render)
+['salary','currentSavingsInput','bridgeBudget','dailyMax'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',render)
+})
 
 render()
 </script>
